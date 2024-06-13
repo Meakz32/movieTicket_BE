@@ -13,6 +13,8 @@ export const userSignup = async (req, res) => {
             return res.send('user already exist')
         }
 
+        if(role === "admin") return res.send("error")
+        
         const saltRounds = 10
         const hashPassword = await bcrypt.hash(password, saltRounds)
 
@@ -37,9 +39,12 @@ export const userSignup = async (req, res) => {
         }
 
         console.log("new user created successfully")
+       
+        const userId = userToDb._id.toHexString()
 
         const token = userToken(email)
         res.cookie("token", token)
+        res.cookie("userId", userId)
         res.send("token created successfully, Sign-up successful")
         console.log("sign-up successful ", token)
     } catch (error) {
@@ -47,6 +52,8 @@ export const userSignup = async (req, res) => {
         return res.send("error in user sign-up")
     }
 }
+
+
 
 // user sign-In 
 export const userSignin = async (req, res) => {
@@ -65,8 +72,10 @@ export const userSignin = async (req, res) => {
             return res.send("Incorrect password")
         }
 
-        const token = userToken(email)
+        const userId = userExist._id.toHexString()
+        const token = userToken(userExist)
         res.cookie("token", token)
+        res.cookie("userId", userId)
         res.send("Logged In")
         console.log("token created successfully, logged-In")
 
@@ -80,4 +89,12 @@ export const userSignin = async (req, res) => {
 export const getUsers = async (req, res) => {
     const users = await User.find()
     res.send(users)
+}
+
+
+// logout 
+export const userLogout = async (req, res) => {
+    res.clearCookie("token")
+    res.clearCookie("userId")
+    res.send("logged out")
 }

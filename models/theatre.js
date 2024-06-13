@@ -28,10 +28,14 @@ const theatreSchema = new mongoose.Schema({
     seatRow : {
         type : Number,
         required : true,
+        min : 1,
+        max : 15
     },
     seatColumn : {
         type : Number,
         required : true,
+        min : 1,
+        max : 20
     },
     status : {
         type : Boolean,
@@ -39,7 +43,9 @@ const theatreSchema = new mongoose.Schema({
         default : false,
     },
     movie : [{type : mongoose.Types.ObjectId, ref : "Movie"}],
-    owner : [{type : mongoose.Types.ObjectId, ref : "User"}]
+    seats : [{type : mongoose.Types.ObjectId, ref : "Seating"}],
+    timing : [{type : mongoose.Types.ObjectId, ref : "Shows"}],
+    owner : {type : mongoose.Types.ObjectId, ref : "User"}
 },{ timestamps : true})
 
 const Theatre = mongoose.model('Theatre', theatreSchema)

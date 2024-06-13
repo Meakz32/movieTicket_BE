@@ -3,6 +3,7 @@ import { connectDb } from '../config/db.js'
 import adminRouter from '../routes/adminRout.js'
 import userRouter from '../routes/userRout.js'
 import cookieParser from 'cookie-parser'
+import ownerRouter from '../routes/ownerRout.js'
 
 
 const app = express()
@@ -13,6 +14,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use('/api/v1/admin', adminRouter)
 app.use('/api/v1/user', userRouter)
+app.use('/api/v1/owner', ownerRouter) 
 
 // db connection 
 connectDb()

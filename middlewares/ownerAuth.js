@@ -14,7 +14,7 @@ function authenticateOwner(req, res, next){
         req.user = user
         console.log(req.user.role)
 
-        if(req.user.role !== "owner") return res.send("You are not a theatre owner")
+        if(req.user.data.role !== "owner") return res.send("You are not a theatre owner")
 
         next()
     })

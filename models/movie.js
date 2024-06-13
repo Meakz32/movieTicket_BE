@@ -10,14 +10,14 @@ const movieSchema = new mongoose.Schema({
         type : String,
         required : true,
         minLength : 10,
-        maxLength : 100,
+        maxLength : 10000,
     },
-    genre :{
+    genre :[{
         type : String,
         required : true,
         minLength : 3,
         maxLength : 100,
-    },
+    }],
     language : {
         type : String,
         required : true,
@@ -29,6 +29,20 @@ const movieSchema = new mongoose.Schema({
         required : true,
         min : 60,
         
+    },
+    image : {
+        type : String,
+        required : true,
+    },
+    status : {
+        type : String,
+        enum : ["running", "upcoming", "Running", "Upcoming"],
+        required : true,
+        default : "running"
+    },
+    year :{
+        type : Number,
+        required : true,
     }
 },{ timestamps : true})
 

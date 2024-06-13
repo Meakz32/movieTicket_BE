@@ -12,8 +12,8 @@ const reviewSchema = new mongoose.Schema({
         min : 1,
         max : 5,
     },
-    user : [{type : mongoose.Types.ObjectId, ref : "User"}],
-    movie : [{ type : mongoose.Types.ObjectId, ref : "Movie"}],
+    user : {type : mongoose.Types.ObjectId, ref : "User"},
+    movie : { type : mongoose.Types.ObjectId, ref : "Movie"},
 },{ timestamps : true })
 
 const Review = mongoose.model('Review', reviewSchema)
