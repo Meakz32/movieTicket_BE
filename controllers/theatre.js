@@ -21,7 +21,7 @@ export const showTheatres = async (req, res) => {
 export const createTheatre = async (req, res) => {
     try {
         console.log("hitted on theatre creation")
-        const { name, state, city, area, seatR, seatC, date, time } = req.body
+        const { name, state, city, area, seatRow, seatColumn, date, time } = req.body
 
         const userId = await req.cookies.userId
         console.log("owner id : ", userId) 
@@ -33,8 +33,8 @@ export const createTheatre = async (req, res) => {
             state,
             city,
             area,
-            seatColumn : seatC,
-            seatRow : seatR,
+            seatColumn,
+            seatRow,
             owner : userId
         })
         
@@ -44,17 +44,15 @@ export const createTheatre = async (req, res) => {
         
         const tName = newTheatre._id
         const seatArr = await arrangement(seatR, seatC, tName)
-        const timeId = await timing(date, time, seatArr)
+        await timing(date, time, seatArr, tName)
 
         const addSeat = await Theatre.findOneAndUpdate(
             { _id : newTheatre._id },
             { 
-                seats : seatArr,
-                timing : timeId
+                seats : seatArr
             }
         )
         if(!addSeat) return console.log("adding seat failed")
-        if(!timeId) return console.log("adding time failed")
 
         return res.send("New theatre created successfully")
     } catch (error) {
@@ -69,46 +67,43 @@ export const editTheatre = async (req, res) => {
         // theatre id 
         const {id} = req.params
 
-        const { movieName, date, time } = req.body
+        let { movieName, date, time } = req.body
 
         const findTheatre = await Theatre.findOne({ _id : id })
 
         if( findTheatre.status === false ) return res.send("Theatre must be approved by admin")
 
-        // movie update 
-        const findMovie = await Movie.findOne({ name : movieName })
-        if(!findMovie) return res.send("can't find movie")
-        const movieId = findMovie._id.toHexString()
-
-        if(findMovie.status == "upcoming") return res.send("can't add this movie, movie has to be 'running'")
-
-        // date & time update 
-        const timeId = await timing(date, time)
 
 
-        const updatedTheatreMovie = await Theatre.findOneAndUpdate(
-            {_id : id},
+
+        if(movieName){
+             // movie update 
+            const findMovie = await Movie.findOne({ name : movieName })
+            if(!findMovie) return res.send("can't find movie")
+            const movieId = findMovie._id.toHexString()
+
+            if(findMovie.status == "upcoming") return res.send("can't add this movie, movie has to be 'running'")
+
+            const updatedTheatreMovie = await Theatre.findOneAndUpdate(
+                {_id : id},
+                    
+                { movie : movieId }
+            )
+            if(!updatedTheatreMovie) return res.send("Theatre updation failed(movie)")
+        }
+
             
-            { movie : movieId }
-        )
 
-        const updatedTheatreTime = await Theatre.findOneAndUpdate(
-            { _id : id },
-            { $push : 
-                { timing : 
-                    { 
-                        $each : [timeId],
-                        $slice : -3
-                    }
-                }
-            }
-        )
+        if(date && time){
+            const seatArr = findTheatre.seats
+            const tName = findTheatre._id
 
-        if(!updatedTheatreMovie) return res.send("Theatre updation failed(movie)")
-        if(!updatedTheatreTime) return res.send("Theatre updation failed(Time)")
+            await timing(date, time, seatArr, tName)
+
+        }
 
         console.log("Theatre updated")
-        return res.send(updatedTheatreTime)
+        return res.send("Theatre Updated")
     } catch (error) {
         console.log("error in theatre updation ", error)
         res.send("Error in Theatre updation")
@@ -125,7 +120,8 @@ export const deleteTheatre = async (req, res) => {
     console.log("deleted all seats")
 
     const findTheatre = await Theatre.findOne({ _id : id })
-    for(let i=0; i<= findTheatre.timing.length; i++){
+    const timeArr = findTheatre.timing.length
+    for(let i=0; i< timeArr; i++){
         await Shows.deleteOne({ _id : findTheatre.timing[i] })
     }
     console.log("deleted all show date & time")
@@ -214,10 +210,6 @@ export const theatreListofMovie = async (req, res) => {
     }
 }
 
-
-//owner
-//add or replace movie to theatre
-
 export const addMovie = async (req, res) => {
     try {
         // theatre id 
@@ -230,7 +222,7 @@ export const addMovie = async (req, res) => {
     
         if( findTheatre.status === false ) return res.send("Theatre must be approved by admin")
     
-        const findMov = await Movie.findOne({ movieName })
+        const findMov = await Movie.findOne({ name : movieName })
         if(!findMov) return res.send("No movie found in this name")
 
         // movie running or not 

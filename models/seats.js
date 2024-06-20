@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const seatShema = new mongoose.Schema({
+const seatSchema = new mongoose.Schema({
     seat : {
         type : String,
         required : true,
@@ -14,5 +14,5 @@ const seatShema = new mongoose.Schema({
     timing : [{ type : mongoose.Types.ObjectId, ref : "Shows" }]
 })
 
-const Seating = mongoose.model("Seating", seatShema)
+const Seating = mongoose.model("Seating", seatSchema)
 export default Seating
